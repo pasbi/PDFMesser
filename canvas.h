@@ -13,12 +13,16 @@ class Canvas : public QLabel
     Q_OBJECT
 public:
     explicit Canvas(QWidget *parent = 0);
+    ~Canvas();
 
 public:
-    void openPDF( const QString& filename );
+    bool openPDF( const QString& filename );
     void zoom( double f );
+    double zoom() const;
     double area() const;
     double lastLength() const { return m_lastLength; }
+    void setDPI( double dpi );
+    void reload();
 
 
 protected:
@@ -30,6 +34,8 @@ private:
     QPixmap m_pixmap;
     double m_zoom;
     double m_lastLength;
+    double m_dpi;
+    QString m_filename;
 
 signals:
     void pointsChanged();

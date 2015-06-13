@@ -20,7 +20,8 @@ private slots:
     void on_action_ffnen_triggered();
     void on_pushButton_2_clicked();
     void updateArea();
-
+    void on_doubleSpinBox1_valueChanged(double arg1);
+    void on_pushButton_3_clicked();
 
 private:
     Ui::MainWindow *ui;

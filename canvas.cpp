@@ -1,5 +1,4 @@
 #include "canvas.h"
-#include <QMessageBox>
 #include <QDebug>
 #include <QWheelEvent>
 #include <qmath.h>
@@ -9,28 +8,34 @@
 Canvas::Canvas(QWidget *parent) :
     QLabel(parent),
     m_zoom( 1 ),
-    m_lastLength( 0 )
+    m_lastLength( 0 ),
+    m_dpi( 150 )
 {
 }
 
-void Canvas::openPDF(const QString &filename)
+Canvas::~Canvas()
 {
+}
+
+bool Canvas::openPDF(const QString &filename)
+{
+    m_filename = filename;
     Poppler::Document* doc = Poppler::Document::load(filename);
     if (doc && doc->numPages() > 0)
     {
-        QImage image = doc->page( 0 )->renderToImage( 300, 300 );
+        QImage image = doc->page( 0 )->renderToImage( m_dpi, m_dpi );
         m_pixmap = QPixmap::fromImage( image );
     }
     else
     {
-        QMessageBox::critical( this,
-                               "Fehler",
-                               QString::fromUtf8("Kann %1 nicht öffnen oder %1 ist leer").arg(filename) );
         m_pixmap = QPixmap();
+        m_filename.clear();
     }
     m_points.clear();
     zoom( 1 );    // does the update
     pointsChanged();
+
+    return !filename.isEmpty();
 }
 
 void Canvas::zoom(double f)
@@ -42,7 +47,7 @@ void Canvas::zoom(double f)
         m_points[i] *= f;
     }
 
-    setPixmap( m_pixmap.scaledToWidth( m_pixmap.width() * m_zoom, Qt::SmoothTransformation ) );
+    setPixmap( m_pixmap.scaledToWidth( m_pixmap.width() * zoom(), Qt::SmoothTransformation ) );
     update();
 }
 
@@ -111,5 +116,20 @@ double Canvas::area() const
     }
     a1 += m_points.last().x() * m_points.first().y();
     a2 += m_points.last().y() * m_points.first().x();
-    return qAbs( (a1 - a2) / 2.0 * m_zoom * m_zoom );
+    return qAbs(a1 - a2) / 2.0 * m_zoom * m_zoom;
+}
+
+void Canvas::reload()
+{
+    openPDF( m_filename );
+}
+
+double Canvas::zoom() const
+{
+    return m_zoom * 100.0 / m_dpi;
+}
+
+void Canvas::setDPI(double dpi)
+{
+    m_dpi = dpi;
 }
