@@ -2,7 +2,11 @@
 #define CANVAS_H
 
 #include <QLabel>
+#ifdef Q_OS_WIN32
+#include "poppler-qt5/poppler-qt5.h"
+#else
 #include "poppler/qt5/poppler-qt5.h"
+#endif
 
 class Canvas : public QLabel
 {
